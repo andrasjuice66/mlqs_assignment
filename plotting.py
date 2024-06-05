@@ -15,12 +15,12 @@ def remove_outliers(df):
 
 for cat in ["Walking", "Sitting", "Cycling"]:
     print(cat)
-    for f in os.listdir("QS/"):
+    for f in os.listdir("data/"):
         if cat in f:
-            for subf in os.listdir("QS/"+f):
+            for subf in os.listdir("data/"+f):
                 print(f, subf)
-                acc = pd.read_csv("QS/"+f+"/"+subf+"/Accelerometer.csv")
-                loc = pd.read_csv("QS/"+f+"/"+subf+"/Location.csv")
+                acc = pd.read_csv("data/"+f+"/"+subf+"/Accelerometer.csv")
+                loc = pd.read_csv("data/"+f+"/"+subf+"/Location.csv")
 
                 acc = remove_start_end(acc)
                 loc = remove_start_end(loc)
