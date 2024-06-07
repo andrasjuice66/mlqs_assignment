@@ -1,1 +1,8 @@
 apple_health_export
+env
+applehealthdata.py
+create_dataset.ipynb
+parse_cda_fitbit_shit.py
+parse_export.py
+AppleHealthData.csv
+analyze_data.ipynb
