@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 import util.util as util
 import copy
-from filterpy.kalman import KalmanFilter
 
 
 # Class for outlier detection algorithms based on some distribution of the data. They
