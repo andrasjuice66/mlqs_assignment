@@ -264,8 +264,8 @@ def main():
     # Concatenate and sort the CSV files by 'Datetime_linacc'
     start = time.time()
     sorted_nested_df = concatenate_and_sort_nested_csv_files("data_processed", 'Datetime_linacc')
-    sorted_nested_output_file = 'data_agg/final_aggregated_output.csv'
-    sorted_nested_df.to_csv(sorted_nested_output_file, index=False)
+    #sorted_nested_output_file = 'data_agg/final_aggregated_output.csv'
+    #sorted_nested_df.to_csv(sorted_nested_output_file, index=False)
     end = time.time()
     print(f"Time taken for concatenating and sorting nested CSV files: {end - start:.2f} seconds")
 
@@ -293,7 +293,7 @@ def main():
     df.drop_duplicates(inplace=True)
     df.drop(columns=df.columns[-8:], inplace=True)
     df.set_index(pd.to_datetime(df['Datetime_linacc']), inplace=True)
-    df.drop(columns=[c for c in df.columns if "Datetime" in c], inplace=True)
+    df.drop(columns=['Datetime_acc', 'Datetime_loc', 'Datetime_gyro'], inplace=True)
     df.drop(columns=["Latitude (°)", "Longitude (°)", "Horizontal Accuracy (m)", "Vertical Accuracy (m)"], inplace=True)
     df.to_csv(f"data_agg/final_aggregated_output_no_outlier.csv")
     end = time.time()
