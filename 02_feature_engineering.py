@@ -3,7 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from ML4QS.Python3Code.Chapter4.TemporalAbstraction import NumericalAbstraction
 from sklearn.preprocessing import LabelEncoder
+from src.FrequencyAbstraction import FourierTransformation
 import time
+
 
 
 def aggregation_features(df):
@@ -27,7 +29,21 @@ def aggregation_features(df):
     return df
 
 def frequency_features(df):
-    return df
+
+    # Convert the 'Datetime_linacc' column to datetime and set as index
+    df['Datetime_linacc'] = pd.to_datetime(df['Datetime_linacc'])
+    df.set_index('Datetime_linacc', inplace=True)
+
+    # Instantiate the FourierTransformation class
+    ft = FourierTransformation()
+
+    # Define the columns to transform, window size, and sampling rate
+    columns = ['Linear Acceleration x (m/s^2)', 'Linear Acceleration y (m/s^2)', 'Linear Acceleration z (m/s^2)']
+    window_size = 5
+    sampling_rate = 5  
+
+    df_transformed = ft.abstract_frequency(df, columns, window_size, sampling_rate)
+    return df_transformed
 
 def main():
     print("Feature enigneering starts...")

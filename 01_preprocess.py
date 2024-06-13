@@ -181,14 +181,11 @@ def concatenate_single_experiments():
                     #Remove rows with no Times (s)
                     df = drop_rows_with_no_time(df)
 
-
                     # Calculate LOF
                     df = calculate_lof(df, acc_cols, 'acc')
                     df = calculate_lof(df, gyro_cols, 'gyro')
                     df = calculate_lof(df, loc_cols, 'loc')
                     df = calculate_lof(df, linacc_cols, 'linacc')
-
-
 
                     # Create the output directory if it doesn't exist
                     output_dir = "data_processed/" + f + "/" + subf
