@@ -36,8 +36,8 @@ class NumericalAbstraction:
 
     # This function aggregates a list of values using the specified aggregation
     # function (which can be 'mean', 'max', 'min', 'median', 'std', 'slope')
-    def aggregate_value(self,data, window_size, aggregation_function):
-        window = str(window_size) + 's'
+    def aggregate_value(self, data, window_size, aggregation_function):
+        window = window_size
         # Compute the values and return the result.
         if aggregation_function == 'mean':
             return data.rolling(window, min_periods=window_size).mean()
