@@ -29,10 +29,9 @@ def aggregation_features(df):
     return df
 
 def frequency_features(df):
-
     # Convert the 'Datetime_linacc' column to datetime and set as index
-    df['Datetime_linacc'] = pd.to_datetime(df['Datetime_linacc'])
-    df.set_index('Datetime_linacc', inplace=True)
+    # df['Datetime_linacc'] = pd.to_datetime(df['Datetime_linacc'])
+    # df.set_index('Datetime_linacc', inplace=True)
 
     # Instantiate the FourierTransformation class
     ft = FourierTransformation()
