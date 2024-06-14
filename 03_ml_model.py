@@ -12,13 +12,6 @@ def xgboost_train_test(train_df, test_df):
     train_df['Activity'] = le.fit_transform(train_df['Activity'])
     test_df['Activity'] = le.transform(test_df['Activity'])
 
-    # Reorder columns to make 'Activity' the first column
-    first_column = 'Activity'
-    train_cols = [first_column] + [col for col in train_df.columns if col != first_column]
-    test_cols = [first_column] + [col for col in test_df.columns if col != first_column]
-    train_df = train_df[train_cols]
-    test_df = test_df[test_cols]
-
     # Split the data into features and target
     X_train = train_df.drop(columns=['Activity'])
     y_train = train_df['Activity']
