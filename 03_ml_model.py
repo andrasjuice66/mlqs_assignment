@@ -19,6 +19,16 @@ def xgboost_train_test(train_df, test_df):
     train_df = train_df[train_cols]
     test_df = test_df[test_cols]
 
+    # Convert object columns to categorical or numerical if possible
+    for col in train_df.columns:
+        if train_df[col].dtype == 'object':
+            try:
+                train_df[col] = pd.to_numeric(train_df[col])
+                test_df[col] = pd.to_numeric(test_df[col])
+            except ValueError:
+                train_df[col] = train_df[col].astype('category')
+                test_df[col] = test_df[col].astype('category')
+
     # Split the data into features and target
     X_train = train_df.drop(columns=['Activity'])
     y_train = train_df['Activity']
@@ -26,7 +36,7 @@ def xgboost_train_test(train_df, test_df):
     y_test = test_df['Activity']
 
     # Initialize the XGBoost classifier
-    xgb = XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42)
+    xgb = XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42, enable_categorical=True)
 
     # Train the model
     xgb.fit(X_train, y_train)
