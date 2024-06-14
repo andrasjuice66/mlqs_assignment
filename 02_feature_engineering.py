@@ -6,18 +6,15 @@ from sklearn.preprocessing import LabelEncoder
 from src.FrequencyAbstraction import FourierTransformation
 import time
 
-
-
 def aggregation_features(df):
-
     # Initialize the NumericalAbstraction class
     num_abs = NumericalAbstraction()
 
     # List of columns to apply the aggregation functions
     cols = ["Acceleration x (m/s^2)", "Acceleration y (m/s^2)", "Acceleration z (m/s^2)",
-                        "Gyroscope x (rad/s)", "Gyroscope y (rad/s)", "Gyroscope z (rad/s)",
-                        "Velocity (m/s)", "Height (m)", "Linear Acceleration x (m/s^2)", 
-                        "Linear Acceleration y (m/s^2)", "Linear Acceleration z (m/s^2)"]
+            "Gyroscope x (rad/s)", "Gyroscope y (rad/s)", "Gyroscope z (rad/s)",
+            "Velocity (m/s)", "Height (m)", "Linear Acceleration x (m/s^2)", 
+            "Linear Acceleration y (m/s^2)", "Linear Acceleration z (m/s^2)"]
     window_size = 10
 
     df[cols] = df[cols].abs()
@@ -29,10 +26,6 @@ def aggregation_features(df):
     return df
 
 def frequency_features(df):
-    # Convert the 'Datetime_linacc' column to datetime and set as index
-    # df['Datetime_linacc'] = pd.to_datetime(df['Datetime_linacc'])
-    # df.set_index('Datetime_linacc', inplace=True)
-
     # Instantiate the FourierTransformation class
     ft = FourierTransformation()
 
@@ -44,23 +37,38 @@ def frequency_features(df):
     df_transformed = ft.abstract_frequency(df, columns, window_size, sampling_rate)
     return df_transformed
 
+def split_data(df):
+    # Define the split index
+    split_index = int(0.8 * len(df))
+    
+    # Split the data into training and testing sets
+    train_df = df[:split_index]
+    test_df = df[split_index:]
+    
+    return train_df, test_df
+
 def main():
-    print("Feature enigneering starts...")
+    print("Feature engineering starts...")
     start_time = time.time()
-    df = pd.read_csv('data_agg/final_aggregated_output_no_outlier.csv', index_col=0)
+    df = pd.read_csv('data_agg/point_two_sec_agg_clean.csv', index_col=0)
 
-    df = aggregation_features(df)
-    end_time_agg = time.time()
-    print(f"Aggregation feature engineering ended in  {end_time_agg - start_time:.2f} seconds.")
+    # Split the data into training and testing sets
+    train_df, test_df = split_data(df)
 
-    df = frequency_features(df)
-    end_time_freq = time.time()
-    print(f"Frequency feature engineering ended in {end_time_agg - end_time_freq:.2f} seconds.")
+    # Perform feature engineering on the training set
+    train_df = aggregation_features(train_df)
+    train_df = frequency_features(train_df)
 
-    df.to_csv(f"data_agg/feature_engineered.csv", index=False)
+    # Perform feature engineering on the testing set
+    test_df = aggregation_features(test_df)
+    test_df = frequency_features(test_df)
+
+    # Save the feature-engineered training and testing sets
+    train_df.to_csv("data_agg/feature_engineered_train.csv", index=False)
+    test_df.to_csv("data_agg/feature_engineered_test.csv", index=False)
+
     end_time = time.time()
-    print(f"Exported feature_engineered.csv in  {end_time_freq - end_time:.2f} seconds.")
-    print(f"Feature engineering endid in total of {end_time - start_time:.2f} seconds.")
+    print(f"Feature engineering completed in {end_time - start_time:.2f} seconds.")
 
 if __name__ == '__main__':
     main()
