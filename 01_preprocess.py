@@ -220,9 +220,10 @@ def concatenate_and_sort_nested_csv_files(base_directory, sort_column):
 
 # Define a custom resampling function to handle non-numeric 'Activity' column
 def resample_with_activity(data, interval):
-    numeric_df = data.drop(columns=['Activity']).resample(interval).mean()
+    numeric_df = data.drop(columns=['Activity', 'Datetime_linacc']).resample(interval).mean()
     activity_df = data['Activity'].resample(interval).first()
-    return numeric_df.join(activity_df)
+    datetime_df = data['Datetime_linacc'].resample(interval).first()
+    return numeric_df.join(activity_df).join(datetime_df)
 
 
 column_corrections = {
