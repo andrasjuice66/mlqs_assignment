@@ -6,12 +6,14 @@ from sklearn.preprocessing import LabelEncoder
 from src.FrequencyAbstraction import FourierTransformation
 import time
 
+pd.options.mode.chained_assignment = None
+
 
 def calc_aggs(df, cols, window, method="mean"):
     num_abs = NumericalAbstraction()
 
     for c in cols:
-        df[c+""+method] = num_abs.aggregate_value(df[c], window, method)
+        df[c+" "+method] = num_abs.aggregate_value(df[c], window, method)
     return df
 
 
@@ -47,6 +49,7 @@ def frequency_features(df):
     df_transformed = ft.abstract_frequency(df, columns, window_size, sampling_rate)
     return df_transformed
 
+
 def split_data(df):
     # Define the split index
     split_index = int(0.8 * len(df))
@@ -56,6 +59,7 @@ def split_data(df):
     test_df = df[split_index:]
     
     return train_df, test_df
+
 
 def main():
     print("Feature engineering starts...")
