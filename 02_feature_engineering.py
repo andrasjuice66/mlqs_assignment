@@ -6,24 +6,34 @@ from sklearn.preprocessing import LabelEncoder
 from src.FrequencyAbstraction import FourierTransformation
 import time
 
-def aggregation_features(df):
-    # Initialize the NumericalAbstraction class
+
+def calc_aggs(df, cols, window, method="mean"):
     num_abs = NumericalAbstraction()
+
+    for c in cols:
+        df[c+""+method] = num_abs.aggregate_value(df[c], window, method)
+    return df
+
+
+def aggregation_features(df, window_size=10):
+
+    # Initialize the NumericalAbstraction class
 
     # List of columns to apply the aggregation functions
     cols = ["Acceleration x (m/s^2)", "Acceleration y (m/s^2)", "Acceleration z (m/s^2)",
             "Gyroscope x (rad/s)", "Gyroscope y (rad/s)", "Gyroscope z (rad/s)",
-            "Velocity (m/s)", "Height (m)", "Linear Acceleration x (m/s^2)", 
-            "Linear Acceleration y (m/s^2)", "Linear Acceleration z (m/s^2)"]
-    window_size = 10
+            "Linear Acceleration x (m/s^2)", "Linear Acceleration y (m/s^2)", "Linear Acceleration z (m/s^2)",
+            "Velocity (m/s)", "Height (m)"]
 
-    df[cols] = df[cols].abs()
+    # df[cols] = df[cols].abs()
 
     # Apply various aggregations
     aggregations = ['mean', 'max', 'min', 'std', 'slope']
     for agg in aggregations:
-        df = num_abs.abstract_numerical(df, cols, window_size, agg)
+        print("Applying method", agg)
+        df = calc_aggs(df, cols, window_size, method=agg)
     return df
+
 
 def frequency_features(df):
     # Instantiate the FourierTransformation class

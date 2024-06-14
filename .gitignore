@@ -10,3 +10,5 @@ data_1
 img
 QS.zip
 data_processed
+__pycache__
+src/__pycache__
