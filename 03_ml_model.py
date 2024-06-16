@@ -1,14 +1,17 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, roc_auc_score, balanced_accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
-from xgboost import plot_importance
+from xgboost import plot_importance, plot_tree
 import time
-
+import seaborn as sns
 def xgboost_train_test(train_df, test_df):
     # Encode the target labels for the training set
     le = LabelEncoder()
+    train_df = train_df.copy()
+    test_df = test_df.copy()
+         
     train_df['Activity'] = le.fit_transform(train_df['Activity'])
     test_df['Activity'] = le.transform(test_df['Activity'])
 
@@ -43,14 +46,45 @@ def xgboost_train_test(train_df, test_df):
 
     # Make predictions
     y_pred = xgb.predict(X_test)
+    y_pred_proba = xgb.predict_proba(X_test)
 
     # Evaluate the model
     print("Accuracy:", accuracy_score(y_test, y_pred))
-    print(classification_report(y_test, y_pred, target_names=le.classes_))
+    print("Balanced Accuracy:", balanced_accuracy_score(y_test, y_pred))
+    print("Precision:", precision_score(y_test, y_pred, average='weighted'))
+    print("Recall:", recall_score(y_test, y_pred, average='weighted'))
+    print("F1-Score:", f1_score(y_test, y_pred, average='weighted'))
+    print(classification_report(y_test, y_pred, target_names=le.classes_, zero_division=0))
+
+    # Confusion Matrix
+    cm = confusion_matrix(y_test, y_pred)
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=le.classes_, yticklabels=le.classes_)
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title('Confusion Matrix')
+    plt.show()
+
+    # ROC-AUC Score (One-vs-Rest)
+    roc_auc_ovr = roc_auc_score(y_test, y_pred_proba, multi_class='ovr')
+    print("ROC-AUC Score (One-vs-Rest):", roc_auc_ovr)
+
+    # Extract feature importance scores
+    importance_scores = xgb.get_booster().get_score(importance_type='weight')
+    # Sort by importance
+    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+    # Get the top 10 features
+    top_10_features = importance_df.head(10)
+    print("Top 10 important features:")
+    top_10_features_list = top_10_features['Feature'].tolist()
+    print(top_10_features_list)
 
     # Plot feature importance
-    plot_importance(xgb)
-    plt.show()
+    plt.figure(figsize=(10, 8))
+    plot_importance(xgb, max_num_features=10)
+    plt.title('Top 10 Feature Importances')
+
+    return top_10_features_list
+
 
 def main():
     print("Model trainings start...")
@@ -62,9 +96,15 @@ def main():
     end_time_data = time.time()
     print(f"Datasets read ended in {end_time_data - start_time:.2f} seconds.")
     print('Start with XGBoost')
-    xgboost_train_test(train_df, test_df)
+    sel_features = xgboost_train_test(train_df, test_df)
     end_time_xgb = time.time()
     print(f"XGBoost training and testing ended in {end_time_xgb - end_time_data:.2f} seconds.")
+
+    # Train on selected features
+    print("Training start on selected features")
+    sel_features_with_activity = sel_features + ['Activity']
+    sel_features2 = xgboost_train_test(train_df[sel_features_with_activity], test_df[sel_features_with_activity])
+    print(sel_features2)
 
 if __name__ == "__main__":
     main()
