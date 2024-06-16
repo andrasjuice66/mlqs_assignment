@@ -2,9 +2,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from ML4QS.Python3Code.Chapter4.TemporalAbstraction import NumericalAbstraction
+import sys
+import os
+sys.path.append(os.path.abspath('/Users/andrasjoos/Documents/AI_masters/Period_6/MLQS/MLQS_assignment'))
+from ML4QS.Python3Code.Chapter7 import FeatureSelection
+import time
 from sklearn.preprocessing import LabelEncoder
 from src.FrequencyAbstraction import FourierTransformation
-import time
+
 
 pd.options.mode.chained_assignment = None
 
@@ -49,22 +54,55 @@ def frequency_features(df):
     df_transformed = ft.abstract_frequency(df, columns, window_size, sampling_rate)
     return df_transformed
 
+def feature_selection(train_df, test_df):
+    X_train = train_df.drop(columns=['Activity'])
+    y_train = train_df['Activity']
 
-def split_data(df):
-    # Define the split index
-    split_index = int(0.8 * len(df))
+    X_test = test_df.drop(columns=['Activity'])
+    y_test = test_df['Activity']
     
-    # Split the data into training and testing sets
-    train_df = df[:split_index]
-    test_df = df[split_index:]
-    
+    feature_sel = FeatureSelection.FeatureSelectionClassification()
+
+    forward_selected_features, ordered_features, ordered_scores = feature_sel.forward_selection(8, X_train, X_test, y_train, y_test)
+    backward_selected_features = feature_sel.backward_selection(8, X_train, y_train)
+
+    forward_df = pd.DataFrame(forward_selected_features, columns=['Forward Selected Features'])
+    print("\nForward Selection Results:")
+    print(forward_df)
+
+    ordered_df = pd.DataFrame({
+        'Ordered Features': ordered_features,
+        'Scores': ordered_scores
+    })
+    ordered_df = ordered_df.sort_values(by='Scores', ascending=False)
+    print("\nOrdered Features and Scores:")
+    print(ordered_df)
+
+    backward_df = pd.DataFrame(backward_selected_features, columns=['Backward Selected Features'])
+    print("\nBackward Selection Results:")
+    print(backward_df)
+
+    return forward_selected_features, backward_selected_features
+
+
+def split_data(df, split_ratio=0.8):
+    # Calculate the split index based on the length of the DataFrame
+    split_index = int(len(df) * split_ratio)
+
+    # Use .iloc for positional slicing
+    train_df = df.iloc[:split_index]
+    test_df = df.iloc[split_index:]
+
     return train_df, test_df
-
 
 def main():
     print("Feature engineering starts...")
     start_time = time.time()
-    df = pd.read_csv('data_agg/point_two_sec_agg_clean.csv', index_col=0)
+    df = pd.read_csv('data_agg/point_two_sec_agg_clean.csv')
+    df = df.drop(columns=['Datetime_linacc.1', 'Datetime_linacc'])
+    df = df.set_index('Time (s)')
+    print(df.columns)
+    print(df.index)
 
     # Split the data into training and testing sets
     train_df, test_df = split_data(df)
@@ -76,7 +114,14 @@ def main():
     # Perform feature engineering on the testing set
     test_df = aggregation_features(test_df)
     test_df = frequency_features(test_df)
+    print(train_df.columns)
 
+    # Feature selection
+    print("Feature selection starts...")
+    forward_features, backward_features = feature_selection(train_df, test_df)
+    train_df = train_df[forward_features]
+    test_df = test_df[forward_features]
+ 
     # Save the feature-engineered training and testing sets
     train_df.to_csv("data_agg/feature_engineered_train.csv", index=False)
     test_df.to_csv("data_agg/feature_engineered_test.csv", index=False)
