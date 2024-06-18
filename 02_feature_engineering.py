@@ -99,6 +99,7 @@ def split_data(df, split_ratio=0.8, random_state=None):
     return train_df, test_df
 
 
+
 def main():
     print("Feature engineering starts...")
     start_time = time.time()

@@ -22,6 +22,7 @@ def xgboost_train_test(train_df, test_df):
     train_df = train_df[train_cols]
     test_df = test_df[test_cols]
 
+
     # Convert object columns to categorical or numerical if possible
     for col in train_df.columns:
         if train_df[col].dtype == 'object':
