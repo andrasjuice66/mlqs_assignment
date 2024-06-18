@@ -38,6 +38,8 @@ def xgboost_train_test(train_df, test_df):
     X_test = test_df.drop(columns=['Activity'])
     y_test = test_df['Activity']
 
+    print(X_train.columns, X_test.columns)
+
     # Initialize the XGBoost classifier
     xgb = XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42, enable_categorical=True)
 
@@ -71,6 +73,7 @@ def xgboost_train_test(train_df, test_df):
     # Extract feature importance scores
     importance_scores = xgb.get_booster().get_score(importance_type='weight')
     # Sort by importance
+    importance_df = pd.DataFrame(list(importance_scores.items()), columns=['Feature', 'Importance'])
     importance_df = importance_df.sort_values(by='Importance', ascending=False)
     # Get the top 10 features
     top_10_features = importance_df.head(10)
@@ -78,10 +81,16 @@ def xgboost_train_test(train_df, test_df):
     top_10_features_list = top_10_features['Feature'].tolist()
     print(top_10_features_list)
 
+    
     # Plot feature importance
-    plt.figure(figsize=(10, 8))
-    plot_importance(xgb, max_num_features=10)
+    plt.figure(figsize=(12, 10))  # Increase the figure size for better readability
+    ax = plot_importance(xgb, max_num_features=10)
     plt.title('Top 10 Feature Importances')
+
+    # Rotate the x-axis labels for better visibility
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()  # Adjust the plot to ensure everything fits without overlapping
+    plt.show()
 
     return top_10_features_list
 

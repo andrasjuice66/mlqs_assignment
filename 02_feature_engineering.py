@@ -63,8 +63,8 @@ def feature_selection(train_df, test_df):
     
     feature_sel = FeatureSelection.FeatureSelectionClassification()
 
-    forward_selected_features, ordered_features, ordered_scores = feature_sel.forward_selection(8, X_train, X_test, y_train, y_test)
-    backward_selected_features = feature_sel.backward_selection(8, X_train, y_train)
+    forward_selected_features, ordered_features, ordered_scores = feature_sel.forward_selection(10, X_train, X_test, y_train, y_test)
+    #backward_selected_features = feature_sel.backward_selection(8, X_train, y_train)
 
     forward_df = pd.DataFrame(forward_selected_features, columns=['Forward Selected Features'])
     print("\nForward Selection Results:")
@@ -78,22 +78,26 @@ def feature_selection(train_df, test_df):
     print("\nOrdered Features and Scores:")
     print(ordered_df)
 
-    backward_df = pd.DataFrame(backward_selected_features, columns=['Backward Selected Features'])
-    print("\nBackward Selection Results:")
-    print(backward_df)
+    # backward_df = pd.DataFrame(backward_selected_features, columns=['Backward Selected Features'])
+    # print("\nBackward Selection Results:")
+    # print(backward_df)
 
-    return forward_selected_features, backward_selected_features
+    return forward_selected_features#, backward_selected_features
 
 
-def split_data(df, split_ratio=0.8):
+def split_data(df, split_ratio=0.8, random_state=None):
+    # Shuffle the DataFrame
+    df_shuffled = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+
     # Calculate the split index based on the length of the DataFrame
-    split_index = int(len(df) * split_ratio)
+    split_index = int(len(df_shuffled) * split_ratio)
 
     # Use .iloc for positional slicing
-    train_df = df.iloc[:split_index]
-    test_df = df.iloc[split_index:]
+    train_df = df_shuffled.iloc[:split_index]
+    test_df = df_shuffled.iloc[split_index:]
 
     return train_df, test_df
+
 
 def main():
     print("Feature engineering starts...")
@@ -101,9 +105,7 @@ def main():
     df = pd.read_csv('data_agg/point_two_sec_agg_clean.csv')
     df = df.drop(columns=['Datetime_linacc.1', 'Datetime_linacc'])
     df = df.set_index('Time (s)')
-    print(df.columns)
-    print(df.index)
-
+ 
     # Split the data into training and testing sets
     train_df, test_df = split_data(df)
 
@@ -114,17 +116,20 @@ def main():
     # Perform feature engineering on the testing set
     test_df = aggregation_features(test_df)
     test_df = frequency_features(test_df)
-    print(train_df.columns)
-
-    # Feature selection
-    print("Feature selection starts...")
-    forward_features, backward_features = feature_selection(train_df, test_df)
-    train_df = train_df[forward_features]
-    test_df = test_df[forward_features]
- 
-    # Save the feature-engineered training and testing sets
+    
     train_df.to_csv("data_agg/feature_engineered_train.csv", index=False)
     test_df.to_csv("data_agg/feature_engineered_test.csv", index=False)
+
+    # # Feature selection
+    # print("Feature selection starts...")
+    # forward_features = feature_selection(train_df, test_df)
+    # sel_features_with_activity = forward_features + ['Activity']
+    # train_df = train_df[sel_features_with_activity]
+    # test_df = test_df[sel_features_with_activity]
+ 
+    # # Save the feature-engineered training and testing sets
+    # train_df.to_csv("data_agg/feature_engineered_train_selected.csv", index=False)
+    # test_df.to_csv("data_agg/feature_engineered_test_selected.csv", index=False)
 
     end_time = time.time()
     print(f"Feature engineering completed in {end_time - start_time:.2f} seconds.")
