@@ -136,6 +136,8 @@ def evaluate_model(model, test_loader, classes):
     plt.show()
 
 
+
+# Main function
 def main():
     # Read datasets
     print('Reading training dataset...')
@@ -217,6 +219,6 @@ def main():
     evaluate_model(model, test_loader, classes)
     print("Evaluation done. Process completed.")
 
-# Run the main function
-if __name__ == '__main__':
+if __name__ == "__main__":
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     main()
