@@ -104,8 +104,9 @@ def main():
     print("Feature engineering starts...")
     start_time = time.time()
     df = pd.read_csv('data_agg/point_two_sec_agg_clean.csv')
-    df = df.drop(columns=['Datetime_linacc.1', 'Datetime_linacc'])
+    df = df.drop(columns=['Datetime_linacc.1'])#, 'Datetime_linacc'])
     df = df.set_index('Time (s)')
+    print(df.columns)
  
     # Split the data into training and testing sets
     train_df, test_df = split_data(df)
@@ -117,6 +118,7 @@ def main():
     # Perform feature engineering on the testing set
     test_df = aggregation_features(test_df)
     test_df = frequency_features(test_df)
+    print(train_df.columns)
     
     train_df.to_csv("data_agg/feature_engineered_train.csv", index=False)
     test_df.to_csv("data_agg/feature_engineered_test.csv", index=False)
