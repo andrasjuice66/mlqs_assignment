@@ -31,7 +31,7 @@ class LSTMClassifier(nn.Module):
 
 import pandas as pd
 
-def shuffle_segments(df, segment_size):
+def shuffle_segments_inside(df, segment_size):
     """
     Shuffle segments within each class in a DataFrame while keeping the order within segments.
 
@@ -62,6 +62,49 @@ def shuffle_segments(df, segment_size):
 
     # Return the shuffled DataFrame
     return shuffled_df
+
+
+import pandas as pd
+import numpy as np
+
+def shuffle_segments_global(df, segment_size):
+    """
+    Shuffle segments within a DataFrame such that each segment contains only one type of activity,
+    but segments are shuffled globally across the dataset.
+
+    Parameters:
+    - df (pd.DataFrame): Input DataFrame containing at least 'Activity' and 'Datetime_linacc' columns.
+    - segment_size (int): The number of rows in each segment to shuffle.
+
+    Returns:
+    - pd.DataFrame: DataFrame with globally shuffled segments.
+    """
+    # Check if necessary columns are present
+    if 'Activity' not in df.columns or 'Datetime_linacc' not in df.columns:
+        raise ValueError("DataFrame must include 'Activity' and 'Datetime_linacc' columns")
+
+    # Add a segment ID based on class label
+    df['segment_id'] = df.groupby('Activity').cumcount() // segment_size
+
+    # Collect all segments
+    segments = []
+    for label, group in df.groupby('Activity'):
+        # Collect segments
+        for _, segment_group in group.groupby('segment_id'):
+            segments.append(segment_group)
+
+    # Shuffle all collected segments
+    np.random.shuffle(segments)
+
+    # Concatenate all segments back into one DataFrame
+    shuffled_df = pd.concat(segments).reset_index(drop=True)
+
+    # Drop the temporary 'segment_id' column
+    shuffled_df.drop('segment_id', axis=1, inplace=True)
+
+    # Return the shuffled DataFrame
+    return shuffled_df
+
 
 
 # Preprocess the data
@@ -157,11 +200,22 @@ def main():
     print("Columns in training dataset:", train_df.columns)
     print("Index type in training dataset:", type(train_df.index))
 
-    # Shuffle segments
+    # # Shuffle segments inside classes
+    # print("Shuffling training dataset segments...")
+    # train_df = shuffle_segments_inside(train_df, 30)
+    # print("Shuffling testing dataset segments...")
+    # test_df = shuffle_segments_inside(test_df, 30)
+
+
+    # Shuffle segments gloabally classes
     print("Shuffling training dataset segments...")
-    train_df = shuffle_segments(train_df, 30)
+    train_df = shuffle_segments_global(train_df, 30)
     print("Shuffling testing dataset segments...")
-    test_df = shuffle_segments(test_df, 30)
+    test_df = shuffle_segments_global(test_df, 30)
+
+    train_df.to_csv("data_agg/train_segmented.csv", index=False)
+    test_df.to_csv("data_agg/test_segmented.csv", index=False)
+
 
     # Preprocess the data
     window_size = 5
