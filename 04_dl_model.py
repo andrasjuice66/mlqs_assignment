@@ -29,8 +29,6 @@ class LSTMClassifier(nn.Module):
         return out
     
 
-import pandas as pd
-
 def shuffle_segments_inside(df, segment_size):
     """
     Shuffle segments within each class in a DataFrame while keeping the order within segments.
@@ -64,8 +62,6 @@ def shuffle_segments_inside(df, segment_size):
     return shuffled_df
 
 
-import pandas as pd
-import numpy as np
 
 def shuffle_segments_global(df, segment_size):
     """
@@ -135,6 +131,7 @@ def preprocess_data(df, target_column, window_size):
     
     return X, y, le.classes_
 
+
 # Training function
 def train_model(model, train_loader, criterion, optimizer, num_epochs):
     model.train()
@@ -152,6 +149,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs):
             optimizer.step()
         
         print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+
 
 # Evaluate the model
 def evaluate_model(model, test_loader, classes):
