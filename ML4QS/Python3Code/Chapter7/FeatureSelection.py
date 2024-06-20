@@ -7,10 +7,10 @@
 #                                                            #
 ##############################################################
 
-from Chapter7.LearningAlgorithms import ClassificationAlgorithms
-from Chapter7.Evaluation import ClassificationEvaluation
-from Chapter7.LearningAlgorithms import RegressionAlgorithms
-from Chapter7.Evaluation import RegressionEvaluation
+from ML4QS.Python3Code.Chapter7.LearningAlgorithms import ClassificationAlgorithms
+from ML4QS.Python3Code.Chapter7.Evaluation import ClassificationEvaluation
+from ML4QS.Python3Code.Chapter7.LearningAlgorithms import RegressionAlgorithms
+from ML4QS.Python3Code.Chapter7.Evaluation import RegressionEvaluation
 from scipy.stats import pearsonr
 import sys
 import copy

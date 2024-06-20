@@ -87,7 +87,8 @@ def feature_selection(train_df, test_df):
 
 def split_data(df, split_ratio=0.8, random_state=None):
     # Shuffle the DataFrame
-    df_shuffled = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    # df_shuffled = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    df_shuffled = df
 
     # Calculate the split index based on the length of the DataFrame
     split_index = int(len(df_shuffled) * split_ratio)
