@@ -6,7 +6,10 @@ import matplotlib.pyplot as plt
 from xgboost import plot_importance, plot_tree
 import time
 import seaborn as sns
+
+
 def xgboost_train_test(train_df, test_df):
+
     # Encode the target labels for the training set
     le = LabelEncoder()
     train_df = train_df.copy()
@@ -73,16 +76,17 @@ def xgboost_train_test(train_df, test_df):
 
     # Extract feature importance scores
     importance_scores = xgb.get_booster().get_score(importance_type='weight')
+
     # Sort by importance
     importance_df = pd.DataFrame(list(importance_scores.items()), columns=['Feature', 'Importance'])
     importance_df = importance_df.sort_values(by='Importance', ascending=False)
+
     # Get the top 10 features
     top_10_features = importance_df.head(10)
     print("Top 10 important features:")
     top_10_features_list = top_10_features['Feature'].tolist()
     print(top_10_features_list)
 
-    
     # Plot feature importance
     plt.figure(figsize=(12, 10))  # Increase the figure size for better readability
     ax = plot_importance(xgb, max_num_features=10)

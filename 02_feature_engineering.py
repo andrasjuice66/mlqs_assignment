@@ -54,6 +54,7 @@ def frequency_features(df):
     df_transformed = ft.abstract_frequency(df, columns, window_size, sampling_rate)
     return df_transformed
 
+
 def feature_selection(train_df, test_df):
     X_train = train_df.drop(columns=['Activity'])
     y_train = train_df['Activity']
@@ -98,7 +99,6 @@ def split_data(df, split_ratio=0.8, random_state=None):
     test_df = df_shuffled.iloc[split_index:]
 
     return train_df, test_df
-
 
 
 def main():

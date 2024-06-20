@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
+
 # Define the LSTM model
 class LSTMClassifier(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_classes):
@@ -62,7 +63,6 @@ def shuffle_segments_inside(df, segment_size):
     return shuffled_df
 
 
-
 def shuffle_segments_global(df, segment_size):
     """
     Shuffle segments within a DataFrame such that each segment contains only one type of activity,
@@ -100,7 +100,6 @@ def shuffle_segments_global(df, segment_size):
 
     # Return the shuffled DataFrame
     return shuffled_df
-
 
 
 # Preprocess the data
@@ -175,7 +174,6 @@ def evaluate_model(model, test_loader, classes):
     plt.ylabel('Actual')
     plt.title('Confusion Matrix')
     plt.show()
-
 
 
 # Main function

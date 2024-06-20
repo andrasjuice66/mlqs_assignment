@@ -24,22 +24,29 @@ def calculate_lof(df, cols, label):
         return df
     
     df[cols] = df[cols].apply(lambda x: x.fillna(x.median()))
-    #df[cols] = df[cols].interpolate()  
+    #df[cols] = df[cols].interpolate()
+
     lof = LocalOutlierFactor(n_neighbors=20, contamination=0.2)
     y_pred = lof.fit_predict(df[cols])
     df[f'lof_{label}'] = y_pred
     df[f'lof_factor_{label}'] = -lof.negative_outlier_factor_  # Negate to align with typical plotting conventions
+
     return df
+
 
 def remove_outliers_and_impute(df, cols, label):
     df.loc[df[f'lof_{label}'] == -1, cols] = pd.NA
+
     # Forward fill NaNs
     df[cols] = df[cols].ffill()
     df.drop(columns = [f'lof_{label}', f'lof_factor_{label}'])
+
     return df
+
 
 def correct_column_names(df, corrections):
     return df.rename(columns=corrections)
+
 
 def add_missing_datetime_column(folder_path):
     # Extract start time from the folder name
@@ -128,7 +135,7 @@ def concatenate_single_experiments():
                     subf_path = os.path.join("data", f, subf)
                     if not os.path.isdir(subf_path):
                         continue  # Skip if it's not a directory
-                    #print(subf)
+                    
                     acc = pd.read_csv("data/" + f + "/" + subf + "/Accelerometer.csv")
                     acc = correct_column_names(acc, column_corrections["Accelerometer"])
 
@@ -137,6 +144,7 @@ def concatenate_single_experiments():
 
                     linacc_path_1 = "data/" + f + "/" + subf + "/Linear Acceleration.csv"
                     linacc_path_2 = "data/" + f + "/" + subf + "/Linear Accelerometer.csv"
+
                     if os.path.exists(linacc_path_1):
                         linacc = pd.read_csv(linacc_path_1)
                     elif os.path.exists(linacc_path_2):
@@ -175,6 +183,7 @@ def concatenate_single_experiments():
                     loc["Distance From Last (m)"] = loc["Distance From Last (m)"].fillna(0)
             
                     df = pd.merge_asof(linacc, pd.merge_asof(loc, pd.merge_asof(acc, gyro, on="Time (s)", direction="nearest"), on="Time (s)", direction="nearest"), on="Time (s)", direction="nearest")
+                    
                     #Activity column
                     df['Activity'] = cat
 
