@@ -105,6 +105,7 @@ def shuffle_segments_global(df, segment_size):
 # Preprocess the data
 def preprocess_data(df, target_column, window_size):
     le = LabelEncoder()
+    df = df.copy()
     df[target_column] = le.fit_transform(df[target_column])
     
     # Convert datetime columns to numerical values
@@ -179,22 +180,17 @@ def evaluate_model(model, test_loader, classes):
 # Main function
 def main():
     # Read datasets
-    print('Reading training dataset...')
-    train_df = pd.read_csv('data_agg/feature_engineered_train.csv', index_col=0)
-    print('Training dataset loaded with dimensions:', train_df.shape)
-
-    print('Reading testing dataset...')
-    test_df = pd.read_csv('data_agg/feature_engineered_test.csv', index_col=0)
-    print('Testing dataset loaded with dimensions:', test_df.shape)
+    print('Reading dataset...')
+    df = pd.read_csv('data_agg/feature_engineered.csv', index_col=0)
+    print('Dataset loaded with dimensions:', df.shape)
 
     # Resetting index
     print('Resetting indices...')
-    train_df.reset_index(drop=False, inplace=True)  
-    test_df.reset_index(drop=False, inplace=True)  
+    df.reset_index(drop=False, inplace=True)  
 
     # Display DataFrame structure
-    print("Columns in training dataset:", train_df.columns)
-    print("Index type in training dataset:", type(train_df.index))
+    print("Columns in dataset:", df.columns)
+    print("Index type in dataset:", type(df.index))
 
     # # Shuffle segments inside classes
     # print("Shuffling training dataset segments...")
@@ -203,18 +199,18 @@ def main():
     # test_df = shuffle_segments_inside(test_df, 30)
 
 
-    # Shuffle segments gloabally classes
-    print("Shuffling training dataset segments...")
-    train_df = shuffle_segments_global(train_df, 30)
-    print("Shuffling testing dataset segments...")
-    test_df = shuffle_segments_global(test_df, 30)
+    # Shuffle segments globally classes
+    segment_size = 100
+    print("Shuffling dataset segments...")
+    df = shuffle_segments_global(df, segment_size)
 
-    train_df.to_csv("data_agg/train_segmented.csv", index=False)
-    test_df.to_csv("data_agg/test_segmented.csv", index=False)
-
+    # Split the dataset for training and testing
+    split_index = int(len(df) * 0.8)
+    train_df = df.iloc[:split_index]
+    test_df = df.iloc[split_index:]
 
     # Preprocess the data
-    window_size = 5
+    window_size = 10
     print("Preprocessing the data...")
     X_train, y_train, classes = preprocess_data(train_df, 'Activity', window_size)
     X_test, y_test, _ = preprocess_data(test_df, 'Activity', window_size)
@@ -236,7 +232,7 @@ def main():
     print("Data conversion complete")
 
     # Create DataLoader
-    batch_size = 32
+    batch_size = 64
     print("Creating data loaders...")
     train_dataset = TensorDataset(X_train, y_train)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)

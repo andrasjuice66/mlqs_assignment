@@ -100,16 +100,32 @@ def xgboost_train_test(train_df, test_df):
     return top_10_features_list
 
 
+def split_data(df, split_ratio=0.8, random_state=None):
+    # Shuffle the DataFrame
+    df_shuffled = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    # df_shuffled = df
+
+    # Calculate the split index based on the length of the DataFrame
+    split_index = int(len(df_shuffled) * split_ratio)
+
+    # Use .iloc for positional slicing
+    train_df = df_shuffled.iloc[:split_index]
+    test_df = df_shuffled.iloc[split_index:]
+
+    return train_df, test_df
+
+
 def main():
-    print("Model trainings start...")
     start_time = time.time()
     print('Read training dataset')
-    train_df = pd.read_csv('data_agg/feature_engineered_train.csv', index_col=0)
-    print('Read testing dataset')
-    test_df = pd.read_csv('data_agg/feature_engineered_test.csv', index_col=0)
+    df = pd.read_csv('data_agg/feature_engineered.csv', index_col=0)
+
     end_time_data = time.time()
-    print(f"Datasets read ended in {end_time_data - start_time:.2f} seconds.")
-    print('Start with XGBoost')
+    print(f"Dataset read in {end_time_data - start_time:.2f} seconds.")
+
+    train_df, test_df = split_data(df)
+
+    print("XGBoost training start...")
     sel_features = xgboost_train_test(train_df, test_df)
     end_time_xgb = time.time()
     print(f"XGBoost training and testing ended in {end_time_xgb - end_time_data:.2f} seconds.")
