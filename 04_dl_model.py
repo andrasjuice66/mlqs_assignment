@@ -181,7 +181,7 @@ def evaluate_model(model, test_loader, classes):
 def main():
     # Read datasets
     print('Reading dataset...')
-    df = pd.read_csv('data_agg/feature_engineered.csv', index_col=0)
+    df = pd.read_csv('data_agg/point_two_sec_agg_clean.csv', index_col=0)
     print('Dataset loaded with dimensions:', df.shape)
 
     # Resetting index
@@ -245,9 +245,9 @@ def main():
     print("Initializing the model...")
     input_size = X_train.shape[2]
     hidden_size = 64
-    num_layers = 2
+    num_layers = 3
     num_classes = len(classes)
-    num_epochs = 20
+    num_epochs = 30
     learning_rate = 0.001
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

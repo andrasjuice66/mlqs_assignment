@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, roc_auc_score, balanced_accuracy_score, precision_score, recall_score, f1_score
@@ -89,7 +90,7 @@ def xgboost_train_test(train_df, test_df):
 
     # Plot feature importance
     plt.figure(figsize=(12, 10))  # Increase the figure size for better readability
-    ax = plot_importance(xgb, max_num_features=10)
+    plot_importance(xgb, max_num_features=10)
     plt.title('Top 10 Feature Importances')
 
     # Rotate the x-axis labels for better visibility
@@ -100,10 +101,49 @@ def xgboost_train_test(train_df, test_df):
     return top_10_features_list
 
 
+def shuffle_segments_global(df, segment_size):
+    """
+    Shuffle segments within a DataFrame such that each segment contains only one type of activity,
+    but segments are shuffled globally across the dataset.
+
+    Parameters:
+    - df (pd.DataFrame): Input DataFrame containing at least 'Activity' and 'Datetime_linacc' columns.
+    - segment_size (int): The number of rows in each segment to shuffle.
+
+    Returns:
+    - pd.DataFrame: DataFrame with globally shuffled segments.
+    """
+    # Check if necessary columns are present
+    if 'Activity' not in df.columns or 'Datetime_linacc' not in df.columns:
+        raise ValueError("DataFrame must include 'Activity' and 'Datetime_linacc' columns")
+
+    # Add a segment ID based on class label
+    df['segment_id'] = df.groupby('Activity').cumcount() // segment_size
+
+    # Collect all segments
+    segments = []
+    for label, group in df.groupby('Activity'):
+        # Collect segments
+        for _, segment_group in group.groupby('segment_id'):
+            segments.append(segment_group)
+
+    # Shuffle all collected segments
+    np.random.shuffle(segments)
+
+    # Concatenate all segments back into one DataFrame
+    shuffled_df = pd.concat(segments).reset_index(drop=True)
+
+    # Drop the temporary 'segment_id' column
+    shuffled_df.drop('segment_id', axis=1, inplace=True)
+
+    # Return the shuffled DataFrame
+    return shuffled_df
+
+
 def split_data(df, split_ratio=0.8, random_state=None):
     # Shuffle the DataFrame
-    df_shuffled = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
-    # df_shuffled = df
+    # df_shuffled = df.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    df_shuffled = df
 
     # Calculate the split index based on the length of the DataFrame
     split_index = int(len(df_shuffled) * split_ratio)
@@ -118,10 +158,12 @@ def split_data(df, split_ratio=0.8, random_state=None):
 def main():
     start_time = time.time()
     print('Read training dataset')
-    df = pd.read_csv('data_agg/feature_engineered.csv', index_col=0)
+    df = pd.read_csv('data_agg/feature_engineered.csv')
 
     end_time_data = time.time()
     print(f"Dataset read in {end_time_data - start_time:.2f} seconds.")
+
+    df = shuffle_segments_global(df, segment_size=100)
 
     train_df, test_df = split_data(df)
 
